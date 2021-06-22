@@ -460,3 +460,166 @@ data %>%
 	summarize(col_name = method(col, na.rm = T|F) 
 ```
 
+### 7. R 그래픽
+
+#### 7-1 데이터 시각화
+
+- 정보의 요약된 형태를 그래프로 전달
+- 인과 관계를 발견하는 등 인사이트 창출
+
+**종류**
+
+- 히스토그램 Histogram : 1차원 (univariate, 일변량)
+- 상자그림 Box plot : 1차원 (데이터 분포 파악)
+- 막대그림 Bar plot : 1차원 (범주형 데이터의 빈도분포)
+- 파이차트 Pie chart : 1차원 (각 범주별 비율)
+- 산점도 Scatter plot : 2차원( x와 y간의 관계 해석)
+
+#### 7-2 그래픽 옵션
+
+- par() : subplots - 그래프 출력 개수 , 마진 등 추가 옵션 가능
+- pty : x축과 y축의 비율 "s" (동일), "m" (최대)
+- legend : 범례, c("name","names")
+- bty : box type 그래프 상자모양 설정, o, l, 7, c u
+- pch : 포인트 모양, 1- 동그라미(기본값), 2 = 세모 ...
+- lty : 선 모양, 1-직선, 2- 점선
+- cex : 문자 - 점의 크기, 기본값 - 1
+- mar : 여백 , (아래, 좌, 위, 우)
+
+```R
+# 기본형 색상, 제목, 변수 범위 분할
+# ex - histogram
+# 변수 범위를 10개로 나눈, 하늘색 그래프 표시, 제목 표시
+hist(data, breaks = 10, col = "skyblue",main = "sample histogram")
+
+# R에서 사용할 수 있는 색상 확인 
+colors()
+
+# 특정 계통의 색들을 확인
+grep("blue",colors(), value = TRUE)
+
+# R의 subplots
+# n, m개의 공간을 만들어서 plot 출력
+par(mfrow = (n,m))
+```
+
+####  7-2-2 Layout
+
+```R
+# par() plot 공간 생성 Like subplots
+par(mfrow = c(n,m))
+plot(x,y)
+
+# 선 추가 abline
+# v = n -> 수직선, h = m -> 수평선
+abline(h = 20) # y = 20인 수평선 추가
+abline(v = 3000) # x = 3000인 수직선 추가
+
+# 기타 선 추가
+abline(a = n, b = m) # 절편이 n, 기울기가 m인 직선
+abline(lm(y~x)) # 회귀 선 추가
+
+# layout(mt = matrix)각 행에 다른 개수의 그래프 출력
+# matrix의 수 순서대로 각 행과 열에 그래프 생성
+m <- matrix(c(1,2,3,3), ncol = 2, byrow= T))
+# 2x2 matrix 생성
+layout(mat = m) 
+# 1행에 그래프 (1,2) 2개 출력, 2행에 (3) 1개 출력
+
+# 범례 legend()
+legend(xloc, yloc, legend = labels)
+# labels은 변수에 맞춰 미리 생성
+```
+
+#### 7-3 Histogram & Density
+
+```R
+# histogram 
+hist(data, | breaks = n, col = 'skyblue',main = 'sample'| )
+
+# Density
+# Density 함수는 plot()과 함께 사용
+# 기타 옵션 동일
+dy = density(data)
+plot(dy)
+
+```
+
+#### 7-4  Boxplot & Barplot
+
+- Boxplot는 사분위수를 시각화 해준다. 이를 통해 두 그룹 간의 분포차이, 이상치 등을 확인 가능하다.
+- Barplot과 Piechart는 column에 속한 데이터 그룹의 빈도를 계산한다. 명목, 순위 변수에 활용 가능하다.
+
+```R
+# 두 그룹 이상 비교할때는 par()를 통해 subplot 공간 생성
+boxplot(data, col = c("color1","color2",...),boxwex = n, main = "sample"  )
+
+# 그룹이 많아지면 관리하기 까다로움으로 벡터와 table을 활용해서 관리한다.
+par(mfrow=c(1,1))
+table(car$cyl)
+freq_cyl<-table(cyl)
+names(freq_cyl) <- c ("3cyl", "4cyl", "5cyl", "6cyl",
+                      "8cyl")
+barplot(freq_cyl, col = c("lightblue", "mistyrose", "lightcyan",
+                          "lavender", "cornsilk"))
+
+pie(freq_cyl)
+
+```
+
+#### 7-5 Scatter plot & Add line
+
+- 산점도는 x와 y의 관계를 확인을 돕는다.
+
+- Python과 달리 R의 기본 plot형은 scatter이다.
+- 산점도에 add line을 통해서 선을 시각화할 수 있다.
+
+```R
+#기본 산점도 
+par(mfrow = c(1,1)) # 하나의 그래프 출력
+x2 <- c(1,2,3)
+y2 <- x2 + 1
+plot(x2,y2) 
+
+# sin, cos 산점도
+par(mfrow = c(2,1)) # 2행 그래프 -> 2개 출력
+x <- seq(0,2*pi, by = 0.001) # 간격이 좁아 선처럼 보인다.
+y <- sin(x)
+y2 <-cos(x)
+plot(x,y,main = "sin curve")
+plot(x,y2, main = "cosine curve")
+
+# 실전
+par(mfrow = c(2,1) , mar = c(4,4,2,2))
+# mar: margin 그래프의 여백공간을 설정한다
+plot(x1,x2, col = as.integer(x3))
+# x3 그룹에 따라 색이 구분되고 x1, x2의 관계에 맞춰 산점도를 출력한다
+
+# Conditioning plot -> 그룹별 산점도
+data1 = subset(data, x3 == 1 | x3 == 2| x3 == 3)
+# x3을 3개의 그룹으로 분리
+coplot(x1 ~ x2| as.factor(data1$x3), data = data1)
+# x1과 x2의 관계를 x3를 기준으로 그룹핑하여 보여준다.
+
+# pairs - 여러 변수별 상관관계를 확인
+pairs(data[ , :colnum], col = as.integer(data$x3))
+
+# abline : 선 추가
+plot(x1,x2, col = as.integer(x3))
+abline(lm(x1 ~ x2)) # 선형 회귀선을 추가
+
+# lowess 비선형 회귀 곡선 LOcally-WEighted polynomial resgreSSion
+lines(lowess(x1,x2))
+
+# lm(x1 ~ x2)는 회귀 결과 식을 반환 class(lm)
+# lowess 는 계산 식을 반환 class(list)
+```
+
+
+
+
+
+
+
+
+
