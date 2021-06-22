@@ -198,6 +198,77 @@ git log는 말그대로 변경이력을 보여준다. --oneline option으로 간
 
 내용이 길어지면 키보드 방향키를 통해 위아래로 움직일 수 있고 나올때는 `q`를 통해 다시 콘솔창으로 돌아올 수 있다.
 
+### 리모트
+
+- github 즉, 온라인 리포지토리를 remote 라고 한다.
+- 로컬에 commit 된 결과물을 remote 리포지토리로 push!
+- 로컬의 각 리포와 remote 리포는 1:n으로 연결할 수 있다.
+  - 마치 내 사진을 google drive, my box, drop box에 업로드 하듯 하나의 로컬 리포짓토리를 github, bitbucket, gitlab 등으로 연결할 수 있다.
+
+1. Github remote 리포짓을 생성한다.
+2. local과 remote를 연결
+3. 실제 업로드 
+
+#### 연결 & 정보 & 삭제
+
+```
+$ git remote add <name> <URL>
+$ git remote add origin https://github.com/~~
+# 연결 정보 확인
+$ git remote -v
+
+# 이름 수정
+$ git remote rename <old name> <new name>
+
+# 연결 삭제
+$ git remote remove <name>
+```
+
+#### 도움말
+
+```
+$ git remote --help
+```
+
+#### 리모트 push
+
+```
+$ git push origin master
+```
+
+ The requested URL returned error: 403 에러가 떴다. 
+
+`remtote add origin `를 통해 명칭을 만들었지만 주소에 권한이 없어서 발생되는 오류라고 한다.
+
+두 가지 방법이 있다.
+
+- 윈도우 검색 - 자격증명 관리자 - windows 자격증명 - 일반자격증명 -  git 관련 자격증명 삭제 후 add 부터 재시도
+- `git remote set-url origin https://<github-username>@github.com/<github-username>/<github-repository-name> `
+   * < > 에는 자신에 맞게 작성
+
+**!**  처음 깃허브 팁을 보면 `git push origin main` 이라는 명령어를 알려주지만, bash 에서 마지막에 (master)라고 보여진다면 main이 아닌 master가 맞다.
+
+####  리모트 PULL
+
+```
+$ git clone <URL.git>
+```
+
+ 다른 컴퓨터에서 최초로 리모트 내용을 복사한다.
+
+ 최초에 단 한번만 `clone`을 수행하면 된다. 절때로, 두번 이상 클론하지말것!
+
+```
+$ git pull <name> <branch>
+$ git pull origin master
+```
+
+
+
+> 앉을때 Pull, 일어설때 Push
+>
+> Sit pull, Stand push
+
 
 
 ## Don't Do That!
@@ -207,3 +278,4 @@ git log는 말그대로 변경이력을 보여준다. --oneline option으로 간
 2. 리포 안의 폴더에서 리포를 만들지 않는다. (리포 하위 폴더에서 `git init`하지 않는다.)
 
    
+
