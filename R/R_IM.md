@@ -545,3 +545,100 @@ interaction.plot(fac1, fac2, target)
 - 하지만 그래프를 통해 확인한 결과 10mg `drug`의 투여에서 `age`에 따른 유의한 차이가 있는 것으로 확인된다.
 - 따라서 그래프와 검정통계량 모두 확인해야한다.
 
+## 4.  상관분석과 회귀모형
+
+###  4-1 상관분석
+
+- 상관분석을 통해 변수간 상관성을 확인할 수 있다.
+
+```R
+# correlation
+cor(var1, var2)
+
+# pairwise plot
+pairs(data , col ...)
+```
+
+- $$
+  0 \leq |corr| \leq 1
+  $$
+
+- 0에 가까울수록 상관이 없는, 1에 가까울수록 강한 상관관계
+
+- `pairwise plot`을 통해 각 변수들간의 상관관계를 한번에 확인할 수 있다.
+
+- `pairs`함수에 `col`인자를 통해 색을 설정할 수 있는데 `as.integer()` 을 통해 범주형 변수별 색상으로 표현 가능하다
+
+- 상관분석 역시 통계치와 그래프 모두 확인해 봐야한다.
+- 특히, 상관분석의 경우 단 하나의 이상치에 의한 영향이 클 수 있으므로 주의해서 확인한다.
+
+### 4-2 선형 회귀분석
+
+- R을 통해 선형 회귀분석을 할 수 있다.
+
+```R
+model = lm(y ~ x, data)
+
+# check model
+summary(model)
+anova(model)
+```
+
+- `lm`을 통해 선형 회귀분석을 수행할 수 있다.
+- 다중 선형 회귀 분석 시 각 독립변수들을 `+` 로 묶어줄 수 있다.
+- `summary`와 `anova`는 모델의 적합성을 확인할 수 있다. `R-squared` 등 확인 가능
+
+- `anova`는 분산분석인줄 알았지만, 모델 적합도를 보여주는 함수였다.
+
+### 4-3 다중 회귀분석
+
+```R
+# basic multiple linear regression
+model <- lm(y ~ x1 + x2 + x3 ... , data = )
+
+# scatter + linear line
+plot(x1, y, col = as.integer(categorical_x))
+abline(lm(y ~ x),col = 'red')
+
+# regression with subset
+data <- read.csv(file ='file-name.csv',stringAsFactor = TRUE)
+data1 <- subset(data, factor == cond1 | factor == cond2)
+
+model2 <- lm(y ~ x1 + x2, data = data1)
+```
+
+- 일반적으로 변수의 수가 늘어나면 모델의 적합도도 상승한다.
+- `Adjusted R-Squared` 지표로 보는게 적합하다. 
+- 변수를 추가하고 빼는 것에는 주의가 필요하다.
+
+### 4-4 회귀 분석 진단 & 평가
+
+- 데이터는 객관적이지만 분석은 사람이 진행하기에 주관성이 개입될 수 밖에 없다.
+- 또한 잘못된 데이터와 부적합한 모델은 분석의 성공여부와 직접적으로 연관이 있으므로 주의 해야 한다.
+- 잘못된 주관이 개입되는 것을 방지하고 정확한 모델을 사용하기 위해 모든 분석에 있어서 모델 진단과 평가는 중요하다.
+  1. 모델을 만들고 `p value`를 통해 중요 변수를 확인한다.
+  2. `R - Squared` 값을 통해 모델의 설명력을 확인한다.
+  3. 그래프 등을 통해 모델의 이상여부를 확인한다.
+
+```R
+model <- lm(y ~ x1  , data = data)
+
+# check p-value
+summary(model)
+anova(model)
+
+# check residuals
+par(mfrow = c(2,2))
+plot(model)
+
+# check linear line
+plot(x1, y, col = as.integer(categorical_x))
+abline(lm(y ~ x), col = 'red')
+
+# boxplot, histogram ....
+```
+
+
+
+
+
