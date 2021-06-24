@@ -24,6 +24,10 @@
 
 - USING()에 입력되는 컬럼에는 테이블 명을 기입하지 않는다. 따라서 별칭을 사용하면 오류가 난다.
 
+#### 성능
+
+- 기준이되는 테이블 `FROM`에 가장 먼저 명시되는 테이블은 크기가 가장 작은것부터 차례로 기술하는것이 좋다.
+
 ### SET Operator
 
 - 서로다른 두 개 이상의 쿼리 결과를 하나로 결합시키는 연산자
@@ -291,5 +295,235 @@ WHERE 	EMP_ID IN ( SELECT 	DISTINCT MGR_ID
                   	WHERE 	MGR_ID IS NOT NULL)
 ```
 
+- Scalar 서브쿼리
+- Select 절에 사용하는 서브쿼리
+- 결과 행의 개수만큼 데이터 반복접근
 
+## DDL - Data Definition Language
+
+- `create`  , `drop` , `alter`
+
+- 데이터 베이스 관리자가 하는 일
+- `TABLE (제약조건)`
+
+- CONSTRAINT - `PK` , `FK` , `NOT NULL` , `CHECK` , `UNIQUE`
+
+### SYNTAX
+
+- CREATE
+
+```sql
+CREATE TABLE <TABLE_NAME> (
+	<COL_NAME> 	DATATYPE	[OPTION],
+	<COL_NAME> 	DATATYPE	[OPTION],
+	<COL_NAME> 	DATATYPE	[OPTION],
+	<COL_NAME> 	DATATYPE	[OPTION],
+	[TABLE CONSTRAINT ~~]
+)
+
+-- CREATE EXAMPLE
+CREATE TABLE TEST_TBL (
+    ID      NUMBER(5)       PRIMARY KEY ,
+    NAME    VARCHAR2(50)    NOT NULL,
+    ADDRESS VARCHAR2(100),
+    REGDATE DATE            DEFAULT SYSDATE
+);
+
+-- CREATE EXAMPLE2
+CREATE TABLE TEST_CHILD3(
+    C_ID    NUMBER(5) ,
+    P_ID    NUMBER(5) ,
+    P_NAME  VARCHAR(50),
+    C_NUM   NUMBER(10)  CHECK ( C_NUM > 0),
+    FOREIGN KEY (P_ID, P_NAME) REFERENCES TEST_PARENT2(P_ID, P_NAME),
+    PRIMARY KEY (C_ID, P_ID, P_NAME)
+);
+
+-- COMPOSITE FOREIGN KEY 
+FOREIGN KEY (CHILD-COL-NAME, CHILD-COL-NAME) REFERENCES TEST_PARENT2(P_ID, P_NAME)
+
+-- CREATE BY SUBQUERY
+-- MUST USE "AS" KEYWORD
+CREATE TABLE TEST_SUBQUERY2
+AS  SELECT   EMP_ID, EMP_NAME, NVL(BONUS_PCT, 0) BN
+    FROM     EMPLOYEE;
+```
+
+- OPTION
+  - `DEFAULT VALUE` ,  `COLUMN_CNSTRAINT` 
+  - 반드시 `DEFAULT OPTION`이 먼저 나와야 함
+  - 각 옵션간은 콤마`,` 구분이 아닌 띄어쓰기로 구분한다.
+  - 복합키는 테이블 레벨의 제약조건으로 명시한다. 즉 컬럼 기술이 끝난 후 마지막에 명시한다.
+  - 복합으로 구성된 외부키도 테이블레벨 제약조건으로 설정해야 한다.
+  - 테이블레벨의 제약조건은 NOT NULL을 제외하고 모두 가능하다.
+  - `SUBQUERY`로 만드는 테이블는 `AS`를 반드시 사용해야 한다.
+  - 함수가 적용될 경우 반드시 별칭이 필요하다.
+  - 혹은 `<TABLE-NAME>`뒤에 따로 컬럼 이름을 명명할수 있다.
+  
+- DROP
+
+```sql
+DROP TABLE <TABLE_NAME> ; 
+```
+
+- ALTER
+
+```sql
+ALTER
+```
+
+## DML - Data Manipulation Language
+
+### INSERT 
+
+```sql
+INSERT INTO <TABLE_NAME>([COLUMN LIST])
+VALUES (VALUE, VALUE, ~~~~) ;
+
+-- INSERT EXAMPLE1
+INSERT INTO TEST_TBL 
+VALUES(100, 'XIANG', NULL, NULL) ;
+
+-- INSERT EXAMPLE2
+INSERT INTO TEST_TBL (ID, NAME, ADDRESS)
+VALUES(200,'MIN', NULL)
+```
+
+- INSERT INTO
+- 앞서 정의한 TEST_TBL에 값을 입력
+- EX1은 명시적으로 4번째 컬럼에 `NULL`을 입력 -> 테이블에 `NULL` 이 입력된다.
+- EX2는 묵시적으로 4번째 컬럼에 `NULL`을 입력 -> 테이블에는 기본값 `SYSDATE`가 입력된다.
+
+```sql
+/*
+TEST_PARENT - P_ID(PK), NAME 
+TEST_CHILD - C_ID,P_ID(FK), PHONE
+*/
+
+INSERT INTO TEST_PARENT 
+VALUES (10,'기획');
+INSERT INTO TEST_PARENT
+VALUES (20,'데이터전담');
+
+INSERT INTO TEST_CHILD
+VALUES (100, 20, 100);
+```
+
+- FK 제약조건 : 부모테이블에 해당 FK 값이 없다면 FK값은 입력되지 않는다.
+
+### UPDATE
+
+```sql
+-- BASIC SYNTAX
+UPDATE 	<TABLE_NAME>
+SET		COL_NAME = VALUE , ....
+WHERE	CONDTION ;
+
+-- EXAMPLE
+UPDATE  DEPARTMENT
+SET     DEPT_NAME = '전략기획팀'
+WHERE   DEPT_ID = 30;
+
+```
+
+- `VALUE` 값으로 특정한 값은 물론 SUBQUERY도 사용 가능하다.
+- `WHERE` 조건을 입력하지 않으면 테이블의 모든 값이 바뀐다.
+
+### DELETE
+
+```sql
+-- BASIC SYNTAX
+DELETE 	TABLE_NAME
+WHERE	CONDTION ;
+
+-- BASIC EXAMPLE
+DELETE  FROM    DEPARTMENT
+WHERE   DEPT_ID = '30';
+```
+
+- 역시나 `WHERE` 조건을 입력하지 않으면 모든 데이터가 삭제된다. 단, 테이블이 삭제되는 것은 아니다.
+
+## View
+
+- 가상 테이블 VIRTUAL  TABLE로 데이터를 보호하고 QUERY를 단순화할 수 있다.
+- DML 작업 불가
+  - 하나의 테이블로 유도된 VIEW는 가능하긴 하지만 원칙적으로 하지 않는것이 맞다.
+
+```sql
+# BASIC SYNTAX
+CREATE OR REPLACE VIEW <VIEW_NAME>
+AS SUBQUERY;
+
+# CREATE VIEW EXAMPLE
+CREATE OR REPLACE VIEW HIREDATE20
+AS  SELECT  HIRE_DATE ,
+            TRUNC(MONTHS_BETWEEN(SYSDATE , HIRE_DATE) / 12) AS 근속년수    
+    FROM    EMPLOYEE 
+    WHERE   MONTHS_BETWEEN(SYSDATE , HIRE_DATE) > 240 ;
+```
+
+- `SELECT`절에 함수가 사용됐다면 별칭을 사용해야한다.
+- `CREATE OR REPLACE` - 뷰는 가상 논리적 테이블이기 때문에 덮어쓰기가 가능하다. 뷰 이름이 겹치면 새로운 뷰가 기존 뷰를 대체한다.
+
+## TOP-N 분석
+
+- `PSUEDO COLUMN` 테이블에는 우리가 정의하지 않아도 `ROWNUM`, `ROWID` 컬럼이 존재한다.
+- `INLINE VIEW`를 통해 TOP-N분석이 가능하다
+
+```sql
+-- CHECK ROWNUM, ROWID
+SELECT	ROWNUM, ROWID, EMP_ID
+FROM	EMPLOYEE;
+
+-- 부서별 평균보다 많은 급여를 받는 직원 정보를 검색
+SELECT	ROWNUM, E.EMP_NAME, E.SALARY, DS.AVSAL
+FROM	EMPLOYEE E
+JOIN 	(SELECT	DEPT_ID, 
+         		ROUND(AVG(SALARY),-3) AVSAL
+         FROM	EMPLOYEE
+         GROUP BY DEPT_ID) DS 
+         ON(E.DEPT_ID = DS.DEPT_ID)
+ORDER BY 3 DESC;
+```
+
+- 위의 검색결과는 `ROWNUM`이 SALARY로 정렬되어 있지 않음
+- 따라서 정렬된 결과에 `ROWNUM`을 부여해야한다.
+- `ORDER BY` 까지를 인라인 뷰로 정의하고 여기에 `ROWNUM`을 부여
+- `ROWNUM`은 `=`연산자로 1만 검색이 가능하지만, `<` 등 범위 검색은 가능하다.
+
+```sql
+SELECT  ROWNUM, EMP_NAME, SALARY
+FROM    (SELECT  E.EMP_NAME, E.SALARY, 
+                 E.DEPT_ID, DS.AVSAL
+         FROM    EMPLOYEE E
+         JOIN    (  SELECT  DEPT_ID, 
+                  	  ROUND(AVG (SALARY),-3) AVSAL
+                    FROM    EMPLOYEE
+                    GROUP BY DEPT_ID) DS 							  ON(E.DEPT_ID = DS.DEPT_ID)
+         WHERE   E.SALARY > DS.AVSAL
+         ORDER BY 2 DESC)
+WHERE   ROWNUM <= 5;         
+```
+
+## SEQUENCE 시퀀스
+
+```sql
+-- AUTOINCREMENT
+-- NEXTVAL, CURRVAL
+
+-- BASIC SYNTAX
+CREATE SEQUENCE <SEQUENCE-NAME>
+<OPTION>;
+
+-- SEQUENCE EX
+CREATE SEQUENCE TESTSEQ;
+SELECT  TESTSEQ.NEXTVAL FROM DUAL;
+SELECT  TESTSEQ.CURRVAL FROM DUAL;
+
+INSERT INTO TEST_CHILD3 
+VALUES (TESTSEQ.NEXTVAL, 10, 'XIANG')
+```
+
+- OPTION : `INCREMENT` , `START_WITH` , `MAXVALUE` , `MINVALUE` , `CYCLE` , `CACHE`
+- 생성된 객체는 계속 COUNT되며 이를 이용해 고유한 번호를 생성해 나갈 수 있다.
 
