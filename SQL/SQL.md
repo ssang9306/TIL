@@ -443,6 +443,26 @@ WHERE   DEPT_ID = '30';
 
 - 역시나 `WHERE` 조건을 입력하지 않으면 모든 데이터가 삭제된다. 단, 테이블이 삭제되는 것은 아니다.
 
+```sql
+-- TRUNCATE
+TRUNCATE TABLE <TABLE_NAME>
+```
+
+- 테이블의 모든 데이터를 삭제하는 TRUNCATE는 DELETE 데이터 삭제보다 빠르다. 
+- TRUNCATE는 `ROLL BACK`이 불가하므로 사용에 주의!
+
+
+
+### 부모테이블과 자식 테이블의 DML 제약조건
+
+|        | PARENT  | CHILD             |
+| ------ | ------- | ----------------- |
+| INSERT | X(없다) | O(있다)           |
+| UPDATE | O       | X(부모의존데이터) |
+| DELETE | O       | X                 |
+
+
+
 ## View
 
 - 가상 테이블 VIRTUAL  TABLE로 데이터를 보호하고 QUERY를 단순화할 수 있다.
@@ -526,4 +546,15 @@ VALUES (TESTSEQ.NEXTVAL, 10, 'XIANG')
 
 - OPTION : `INCREMENT` , `START_WITH` , `MAXVALUE` , `MINVALUE` , `CYCLE` , `CACHE`
 - 생성된 객체는 계속 COUNT되며 이를 이용해 고유한 번호를 생성해 나갈 수 있다.
+
+## TCL 
+
+### ROLLBACK
+
+- 테이블 변경 이전 지점으로 돌아간다.
+
+### COMMIT
+
+- 테이블 변경을 확정한다.
+- 하나의 테이블에 두 개 이상의 섹션에서 변경을 시도하면, 먼저 접근한 섹션이 `COMMIT`을 수행하기 전까지 다른 섹션은 테이블 변경이 불가하다.
 

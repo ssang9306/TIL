@@ -177,7 +177,33 @@ inspect(dvd_rule)
   - parameter : 지지도와 신뢰도는 최소값을 입력해준다. minlen은 최소가 되는 A와 B의 아이템 개수이다. 
     - minlen 1을 입력하면 모든 아이템 각각에 대한 장바구니 분석부터 시작된다.
 
+```R
+# Groceries Example data
 
+library(arules)
+data("Groceries")
 
+summary(Groceries)
+# 9835 transactions, 169 items
+Groceries
 
+# itemFrequencyPlot
+itemFrequencyPlot(Groceries, topN = 10, col = 'skyblue',main = 'BEST 10 ITEMS')
+
+# grocery_rule
+grocery_rule <- apriori(Groceries, parameter = list(sup = 0.05, conf = 0.2, minlen = 2))
+grocery_rule
+
+# check result
+summary(grocery_rule)
+inspect(grocery_rule)
+
+# order by sup desc
+inspect(sort(grocery_rule, by = 'sup'))
+
+# test on sup = 0.04 and intesrted in (yogurt, rolls/buns)
+test_rule <- apriori(Groceries, parameter = list(sup = 0.04, conf = 0.2, minlen = 2))
+test_res <- subset(test_rule, items %in% c('yogurt','rolls/buns'))
+inspect(test_res)
+```
 
