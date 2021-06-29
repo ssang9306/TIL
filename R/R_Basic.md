@@ -43,6 +43,8 @@ class("I like pork")
 #도움!
 help(vector)
 help(boxplot)
+?vector
+?boxplot
 ```
 
 가장 처음 헷갈린 점은 R의 벡터 개념이다.
@@ -57,7 +59,7 @@ help(boxplot)
 
 
 
-#### 1-1  슬라이싱과 벡터생성
+#### 1-1  벡터 생성과 인덱스
 
  ```R
  x<-c(1,3,5,7,9)
@@ -163,6 +165,39 @@ colnames(y) <- c("y1","y2","y3")
 
 dimnaems 를 통해 각 행과 열에 이름을 부여할 수 있다. dim차원에 맞춰 dim[[1]] 은 row, dim[[2]]는 col을 의미하며, colnames를 통해 열에 이름을 부여할 수 있다.
 
+##### 1-2-3 apply
+
+```R
+# 각 행/열에 대해 함수 적용
+# apply(data, 방향, 함수)
+# vector | matrix를 데이터로 받아 임의의 함수 적용
+# 함수: sum, mean, UserDefineFunction
+# 방향: 1-행, 2-열
+
+# ex
+data <- iris[,-5]
+apply(data, 2, sum)
+apply(data, 2, median)
+
+# easy way
+summary(data)
+
+# rowSums(), colSums(), rowMeans(), colMeans()
+colSums(data)
+colMenas(data)
+
+# order() 정렬
+order(data[, 1], decreasing = T) # return idx
+data[order(data[,1], decreasing = T) , ]
+
+# 특정 열 값이 짝수인 행만 선택
+exDF[exDF$x %% == 0,]
+```
+
+
+
+
+
 #### 1-3 factor
 
  ```R
@@ -186,6 +221,291 @@ survey_factorlevel <- factor(survey, ordered = TRUE, levels = c("불만족","보
 ```
 
 위와 같이 ordered = True와 levels 값을 입력해주면, 불만족<보통<만족 으로 서열변수로써 변수가 생성할 수 있다.
+
+#### 1-4 형 확인
+
+```R
+typeof(x)
+mode(x)
+string(x)
+class(x)
+```
+
+#### 1-5 names
+
+```R
+# naems()로 각 자료의 셀에 이름 부여
+x <- c(1,3,5)
+col <- c('x1','x2','x3')
+names(x) <- col
+x # --> 자료의 이름과 데이터로 이루어진 벡터 확인가능
+
+# 설정한 이름으로 데이터 조회
+x[c('x1','x2')]
+
+# names(변수) -> 셀의 이름을 반환
+names(x)[1] # --> 인덱싱도 할 수 있다
+```
+
+#### 1-6 자료형 연산
+
+```R
+# 길이 확인 length(), nrow(), NROW()
+length(x)
+nrow(x) # -> matrix의 행 수 반환
+NROW(x) # 단 1개의 행인 자료형에 대해 열의 개수를 반환
+
+# R에서는 벡터 연산이 가능하다
+# 어떤 값이 벡터에 포함됐는지 확인 %in%
+a_vec <- 'f' %in% c('a','b','c')
+a_vec  # -> FALSE
+
+# 벡터에 대해 집합연산자도 사용가능
+setdiff( c('a','b','c',),c('a','b')) # 차집합
+union(c('a','b','c',),c('a','b')) # 합집합
+intersect(c('a','b','c',),c('a','b')) # 교집합
+setequal( c('a','b','c'),c('a','b')) # 두 집합이 같음?
+
+# 앞/뒤 n개의 데이터 슬라이싱
+x <- head(x,n) # 자료형으로 입력 가능
+tail(x,n)
+
+# Month의 이름을 가져오기
+month.name # 정식 영어명칭 January, Feburary ...
+month.abb  # 축약어 Jan, Feb ...
+#이런 표현도 가능하다...
+paste(month.abb, 1:12, c('st','nd','rd',rep('th',9)))
+
+# 논리형 벡터 (T,F)
+# &(and), |(or), !(not) xor
+c(T,F,T, TRUE,FALSE)
+c(T,F,T) | c(TRUE)  # (TRUE,TRUE,TRUE)
+c(T,F,T) & c(TRUE)  # (TRUE,FALSE,TRUE)
+!c(T,F,T) # (FALSE, TRUE, FALSE)
+xor(c(T,F,T), C(TRUE)) # (FALSE TRUE FALSE)
+
+```
+
+#### 1-7 정규 표현식
+
+```R
+# 비정형 데이터를 handling할 때, 불순물 제거
+
+# *  0 or more.
+# +  1 or more.
+# ?  0 or 1.
+# .  무엇이든 한 글자를 의미
+# ^  시작 문자 지정 
+# ex) ^[abc] abc중 한 단어 포함한 것으로 시작
+# [^] 해당 문자를 제외한 모든 것 ex) [^abc] a,b,c 는 빼고
+# $  끝 문자 지정
+# [a-z] 알파벳 소문자 중 1개
+# [A-Z] 알파벳 대문자 중 1개
+# [0-9] 모든 숫자 중 1개
+# [a-zA-Z] 모든 알파벳 중 1개
+# [가-힣] 모든 한글 중 1개
+# [^가-힣] 모든 한글을 제외한 모든 것
+# [:punct:] 구두점 문자, ! " # $ % & ’ ( ) * + , - . / : ; < = > ? @ [ ] ^ _ ` { | } ~.
+# [:alpha:] 알파벳 대소문자, 동등한 표현 [A-z]
+# [:lower:] 영문 소문자, 동등한 표현 [a-z]
+# [:upper:] 영문 대문자, 동등한 표현 [A-Z].
+# [:digit:] 숫자, 0,1,2,3,4,5,6,7,8,9,
+# [:xdigit:] 16진수  [0-9A-Fa-f]
+# [:alnum:] 알파벳 숫자 문자, 동등한 표현[A-z0-9].
+# [:cntrl:] \n, \r 같은 제어문자, 동등한 표현[\x00-\x1F\x7F].
+# [:graph:] 그래픽 (사람이 읽을 수 있는) 문자, 동등한 표현
+# [:print:] 출력가능한 문자, 동등한 표현
+# [:space:] 공백 문자: 탭, 개행문자, 수직탭, 공백, 복귀문자, 서식이송
+# [:blank:] 간격 문자, 즉 스페이스와 탭.
+
+# grp -> pattern에 맞는 것들을 x로부터 추출
+# main option : ignore.case(대소 구분x), value
+strvec <- c('gender','height','age','weight','eight')
+
+# ei로 시작하는 데이터 추출
+grep('^ei',strvec) # index를 추출
+grep('^ei',strvec, value = T, ignore.case = T)
+# ei로 시작하는 해당하는 값들을 대소문자 관계없이 모두 찾아 반환
+
+# ei를 포함하는 문자열 추출
+grep('ei',strvec,value = T)
+grep('+ei+',strvec, value = T)
+# + : 문자가 1 or more 있는 공간을 의미
+
+# grepl -> return boolean
+grepl('+ei',strvec)
+
+txtVec <- c('BigDdata','Bigdata','bigdata','Data','dataMining','class1','class2')
+
+# 문자열을 바꾸는 gsub
+gsub('+big+','bigger',txtVec,ignore.case = T)
+
+# 포함된 모든 숫자를 지우기
+gsub('[0-9]','',txtVec)
+gsub('[[:digit:]]','',txtVec)
+
+sub('[0-9]','',txtVec)
+sub('[[:digit:]]','',txtVec)
+```
+
+#### 1-8 stringr
+
+```R
+library(stringr)
+# stringr package는 문자열 객체와 관련있는 다양한 함수가 있다
+
+greeting_msg <- 'hello, bigdata is very important'
+substr(greeting_msg, 5, 11)
+strsplit(greeting_msg, ' ')
+
+# 정규표현식을 사용하여 원하는 부분을 추출할 수 있다.
+msg <- 'abc123def456'
+# msg에서 숫자인 첫 3자리를 추출
+str_extract(msg, '[0-9]{3}')
+# msg 전체에서 숫자 3자리를 추출
+str_extract_all(msg, '[0-9]{3}')
+# str_extract = sub() / extract_all = gsub() g-global
+sub('[a-z]+','','abc123def456')
+gsub('[a-z]+','','abc123def456')
+
+string_dummy <- '상민xiang9306 상상minplus 1995'
+# 영어 단어만 추출, 단어의 최소와 최대자리수를 지정(4,5)
+str_extract_all(string_dummy,'[a-zA-z]{4,5}')
+# 연속된 한글 3자 이상 추출
+str_extract_all(string_dummy,'[가-힣]{3,}')
+# 숫자를 제외하고 추출
+str_extract_all(string_dummy,'[^0-9]{1,}')
+
+# 문자열 위치 return (list)
+str_locate_all(string_dummy,'상민')
+
+# 문자열 치환
+str_replace(string_dummy, '상민','쌍쌍')
+
+# 부분 문자열
+str_sub(string_dummy,7,10)
+
+# 특수문자 제외
+num <- '$123,456'
+gsub('[[:punct:]]','',num) # 공백으로 치환
+str_replace_all(num, '\\$ | \\,' , '') 
+# $ , 두 문자를 모두삭제 |(or)로 연결
+
+```
+
+#### 1-9 메타문자
+
+```R
+# 단어 : \\w 	숫자: \\d	 엔터: \n,  탭키: \t
+# 특수문자 : \\<해당특수문자>
+# [] 1회 {n} n회반복
+
+# 똑같은 표현
+ssn <- '951129-1234567'
+str_extract_all(ssn,'[0-9]{6}-[1-4][0-9]{6}')
+str_extract_all(ssn,'\\d{6}-[1-4]\\d{6}')
+
+email <- 'ssang9306@naver.com'
+str_extract_all(email,'\\w{4,}@\\w{3,}.[A-z]{2,}')
+```
+
+#### 1-10 배열 - 단일형 변수
+
+```R
+# array(), dim(c())
+# 변수와 선언을 괄호로 묶으면 선언과 동시에 실행
+(m <- matrix(c(1:12), ncol =4 )) 
+class(m)  # -> 'matrix' : 'array'
+
+(arr <- array(1:12, dim = c(3,4)) )
+class(arr) # -> 'matrix' : 'array'
+# ~ 2차원 array는 matrix와 유사하다. 거의 같다
+
+( arr <- array(1:12, dim = c(2,2,3)) )
+class(arr) # 3차원부터는 배열
+
+# arr[행, 열, 차원요소(면)]
+arr[1,1,1]
+arr[,,2]
+
+# apply 적용 가능
+apply(arr, 2, mean)
+apply(arr, c(1,2), mean)
+
+```
+
+#### 1-11 List
+
+```R
+# list( key = value)  like python - dict
+# list()
+# lapply() -> return(list, (key, value))
+# sapply() -> return(list, value)
+
+# 참고
+a = 10 # scalar
+a = c(10) # vector
+
+( tmp_list <- list(name = 'xiang',
+                  height = 188) )
+
+# value selection
+tmp_list$name
+# type = list
+mode(tmp_list)
+class(tmp_list)
+
+# type = data type
+mode(tmp_list$name)
+class(tmp_list$height)
+
+# use str() check list structure
+str(tmp_list)
+
+# key를 부여하지 않는 경우
+tmp_list <- list(1:4, rep(3:5), 'dog')
+str(tmp_list)
+
+# 숫자로 인덱싱이 가능함
+tmp_list[[1]]
+# value가 단일값이 아니라면 추가적 인덱싱도 가능
+tmp_list[[1]][2:3]
+
+```
+
+##### 1-11-1 중첩구조
+
+```R
+# 벡터의 값이 묶여서 하나로 생성되는 것이 아닌
+# 벡터의 각 값이 하나씩 value가 된다
+
+new_list <- c( list(1,2,tmp_list),c(3,4))
+
+over_list1 <- list(a = list(e = c(1,2,3)),
+                 b = list(f = c(4,5,6)))
+# data selection
+over_list1$a$e
+over_list1$b$f
+
+over_list2 <- list(a = list(c(1,2,3)),
+                  b = list(c(4,5,6)))
+# data selection
+over_list2$a[[1]]
+over_list2$b[[2]][2:3]
+
+( user_info <- list( name = c('Xiang','Min'),
+                   address = c('Incheon','Nonhyeon'),
+                   tel = c('010-9999-1111','179233'),
+                   age = c(27,25),
+                   marriage = (F,F)) )
+
+user_info[1] # return list
+user_info$name #return character vector
+user_info[1]$name # 이런식으로 접근도 가능은 함
+
+```
+
+
 
 
 
@@ -289,6 +609,40 @@ $$
 `solve` 함수를 활용하여 쉽게 구할 수 있다.
 
 eigen을 통해 고유치와 고유 벡터 연산이 가능하고, 이를 통해 데이터의 특성 파악이 가능하다.
+
+#### 2-3 디버깅
+
+```R
+# print(), paste(), sprintf()을 통한 디버깅
+
+# print() 는 다른 행으로 출력된다
+print('hi')
+print('new line')
+
+# Formatting -> sprintf : %d, %s, %f
+sprintf('%d',10)
+sprintf('%s : %f','pi',3.141592)
+
+# paste (sep defualt =  ' ')
+paste('a','b','c', sep = '')  # --> abc
+paste('a','b','c', sep = '-') # --> a-b-c
+```
+
+#### 2-4 함수
+
+```R
+# user define function
+myFunc <- function(){
+    a <- 0
+    cat('append')
+    for(i in 1:10){
+        a <- a + i
+        cat(i,'...')
+    }
+    cat('end!','\n')
+    return(a)
+}
+```
 
 ### 3. 패키지 설치와 실행
 
