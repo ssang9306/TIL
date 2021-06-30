@@ -218,9 +218,22 @@ survey <- c("불만족","보통","만족")
 survey_factor <- factor(survey) # 명목변수로 변환
 survey_factorlevel <- factor(survey, ordered = TRUE, levels = c("불만족","보통","만족"))
 # 서열변수로써 변수 생성
+
+# 요소 확인
+levels(survey)
+levels(survey)[1]
 ```
 
 위와 같이 ordered = True와 levels 값을 입력해주면, 불만족<보통<만족 으로 서열변수로써 변수가 생성할 수 있다.
+
+```R
+# 빈도 확인
+table(survey_factor)
+plot(survey_factor)
+
+```
+
+
 
 #### 1-4 형 확인
 
@@ -503,9 +516,149 @@ user_info[1] # return list
 user_info$name #return character vector
 user_info[1]$name # 이런식으로 접근도 가능은 함
 
+# List값의 변경
+user_info$age[1] <- 30
+
+# 새로운 key, value 추가
+user_info$id <- c('1214','3330')
+
+# key 제거
+user_ifo$id <- NULL
+
+# 형 변환 list -> vector
+v1 <- unlist(lst01)
+
 ```
 
+##### 1-11-2 apply
 
+```R
+# sapply , lapply
+lst02 <- list(1:5)
+lst03 <- list(6:10)
+
+l_res <- lapply(X = c(lst02,lst03), FUN = sum)
+s_res <- sapply(X = c(lst02,lst03), FUN = mean)
+
+# lapply는 list로 결과를 반환
+# sapply는 vector로 결과를 반환
+
+# Use user define function 
+res <- sapply(1:3, fucntion(x) {x * 2})
+```
+
+#### 1-12 data.frame
+
+```R
+id <- c(100,200,300)
+name <- c('xiang','min','xixi')
+salary <- c(1000000,2000000,3000000)
+
+# colname = data
+ex_df <- data.frame(ID = id, NAME = name, SALARY = salary)
+
+# data selection
+ex_df$ID
+# indexing
+ex_df[1,]
+ex_df[c(1,3),2]
+ex_df[-1, c('ID','SALARY')]
+# Filtering
+ex_df[, names(ex_df) %in% c('NAME','SALARY')]
+
+# matrix를 이용한 방법
+mat_ <- matrix( data = c(1, 'xiang',150,
+                         2, 'min', 150,
+                         3, 'xixi', 150),
+               nrow = 3,
+               byrow = T))
+mat_df <- data.frame(mat_)
+
+# drop option , T -> return (vector), F -> data.frame
+(sample_df <- data.frame(x = c(1,2,3,4,5),
+                       y = c(2,4,6,8,10)))
+
+class(sample_df[-1,'x']) # -> vector
+class(sample_df[-1,'x', drop = F]) # -> data.frame
+
+# rownames(), colnames()
+sample_df <- data.frame(1:3, 4:6)
+colnames(sample_df) <- c('feature01','feature02')
+rownames(smaple_df) <- c('idx01','idx02','idx03')
+
+# 행의 수 nrow(), 열의 수 ncol()
+ncol(sample_df)
+nrow(sample_df)
+names(sample_df) # rownames
+
+# 행, 열 추가 
+# cbind(), rbind()
+z <- c(100,200,300,400,500)
+sample_df <- cbind(sample_df, z)
+sample_df <- rbind(sample_df,c(6,60,600))
+
+```
+
+##### 1-12-1 with & split
+
+```R
+# 편리하게 데이터 필드에 접근할 수 있다
+# 데이터 프레임 또는 리스트 내 존재하는 필드를 손쉽게 접근하기 위한 함수
+# with(dataset, 함수 | 표현식) , within()
+# with() -> 읽기전용 	within() -> 수정
+# with(dataset, tapply(vector, factor, func))
+
+# 하나의 함수(표현식)
+with(iris, mean(Sepal.Length))
+# 둘 이상의 함수(표현식) -> print() 로 확인 가능
+with(iris, { print( mean( Sepal.Length))
+           	print( mean( Sepal.Width)) 
+            }) # 콤마 없이 구분
+
+# within() 을 활용한 결측값 처리
+x <- data.frame(val = c(1,2,3,4, NA, 5,NA))
+is.na(x$val)
+sum(is.na(x$val))
+mean(x$val, na.rm = T)
+
+# ifelse( 조건, 참, 거짓) -> SQL의 DECODE와 유사
+x <- within(x,
+           val <- ifelse(is.na(val),
+                        mean(x$val, na.rm =T),
+                        val))
+# 혹은
+x$val[is.na(x$val)] <- median(x$val, na.rm = T)
+```
+
+```R
+# 결측값 처리 예시
+# iris data의 1번 row는 setosa며 임의적으로 결측값을 입력
+# setosa의 평균값으로 결측값을 처리하려고 한다.
+iris[1,1] <- NA
+head(iris)
+setosa.df <- iris[iris$Species == 'setosa',]
+iris[iris$Species == 'setosa' & is.na(iris) , is.na(iris)] <- mean(setosa.df$Sepal.Length,na.rm = T)
+
+# split
+# 각각의 factor로 분류된 list 반환
+# split(dataset, factor)
+split(iris$Sepal.Length, iris$Species)
+
+# 반환된 형태는 list이므로 list형의 data selection 가능
+split(iris$Sepal.Length, iris$Species)$setosa
+
+# split을 활용한 결측값 처리
+# 각 종(Species)별 Sepal.Length의 중앙값을 구한다
+iris.sl.median <- sapply(split(iris$Sepal.Length,
+                              iris$Species),
+                        median, na.rm = T)
+# within()을 사용하여 값이 na인 곳에 해당하는 종의 중앙값을 입력한다.
+iris <- within(iris, {
+    Sepal.Length <- ifelse(is.na(Sepal.Length), 
+                          iris.sl.median[Species],
+                          Sepal.Length)
+})
+```
 
 
 
@@ -732,6 +885,8 @@ data <- read.csv("filename")
 #### 6-2 Subset & 요약통계
 
 ```R
+# data.frame으로부터 조건에 만족하는 행을 추출하고 추출된 내용을 data.frame 형태로 만드는 것
+
 data <- read.csv("filename")
 
 data_sub1 <- subset(data, colname == condition)
@@ -741,6 +896,25 @@ aggregate(var1 ~ group, data, FUN = mean)
 #group별 var1변수에 대해 mean 통계치를 보여준다.
 #FUN을 활용하여 다양한 통계치 확인 가능
 
+x <- 1:5
+y <- 6:10
+z <- letters[1:5]
+
+# 기본형
+tmp.df <- data.frame(x,y,z)
+tmp.df.sub <- subset(tmp.df, x>= 3)
+
+# 특정 열만 선택 -> select option
+tmp.df.sub <- subset(tmp.df, x>=3 , select = c('x','y'))
+
+# return vector -> drop option
+tmp.df.subvec <- subset(tmp.df, x>=3 ,
+                       select = c('x','y'), drop =T)
+
+# iris example 
+# (1,3,5)번 컬럼 대상 3번 값이 평균보다 큰 data 선택
+iris.sub <- subset(iris, iris[,3] >= mean(iris[,3]),
+                  select = c(1,3,5))
 ```
 
 #### 6-3 테이블 내보내기
